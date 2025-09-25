@@ -5,6 +5,7 @@ import (
         "fmt"
         "twitch-rpg/internal/database"
         "twitch-rpg/internal/models"
+        "twitch-rpg/internal/storage"
 )
 
 // CharacterService handles character-related operations
@@ -18,11 +19,14 @@ func NewCharacterService() *CharacterService {
 // CreateCharacter creates a new character for a user
 func (cs *CharacterService) CreateCharacter(username string, twitchUserID *string) (*models.Character, error) {
         if database.DB == nil {
-                return nil, fmt.Errorf("database connection not available")
+                return storage.Memory.CreateCharacter(username, twitchUserID)
         }
         
         // Check if character already exists
-        existing, _ := cs.GetCharacterByUsername(username)
+        existing, err := cs.GetCharacterByUsername(username)
+        if err != nil {
+                return nil, fmt.Errorf("failed to check existing character: %v", err)
+        }
         if existing != nil {
                 return nil, fmt.Errorf("character with username '%s' already exists", username)
         }
@@ -48,7 +52,7 @@ func (cs *CharacterService) CreateCharacter(username string, twitchUserID *strin
 // GetCharacterByID retrieves a character by ID
 func (cs *CharacterService) GetCharacterByID(id int) (*models.Character, error) {
         if database.DB == nil {
-                return nil, fmt.Errorf("database connection not available")
+                return storage.Memory.GetCharacterByID(id)
         }
         query := `
                 SELECT id, username, twitch_user_id, level, experience, channel_points_spent,
@@ -90,7 +94,7 @@ func (cs *CharacterService) GetCharacterByID(id int) (*models.Character, error) 
 // GetCharacterByUsername retrieves a character by username
 func (cs *CharacterService) GetCharacterByUsername(username string) (*models.Character, error) {
         if database.DB == nil {
-                return nil, fmt.Errorf("database connection not available")
+                return storage.Memory.GetCharacterByUsername(username)
         }
         query := `
                 SELECT id, username, twitch_user_id, level, experience, channel_points_spent,
@@ -131,6 +135,10 @@ func (cs *CharacterService) GetCharacterByUsername(username string) (*models.Cha
 
 // UpdateCharacter updates character information
 func (cs *CharacterService) UpdateCharacter(character *models.Character) error {
+        if database.DB == nil {
+                return storage.Memory.UpdateCharacter(character)
+        }
+        
         query := `
                 UPDATE characters SET 
                         level = ?, experience = ?, channel_points_spent = ?,
@@ -315,10 +323,48 @@ func (cs *CharacterService) loadCharacterEquipment(character *models.Character) 
         return nil
 }
 
+// GetCharacterInventory retrieves a character's inventory (list of owned items)
+func (cs *CharacterService) GetCharacterInventory(characterID int) ([]models.Item, error) {
+        if database.DB == nil {
+                // Return empty inventory for memory storage (simplified)
+                return []models.Item{}, nil
+        }
+        
+        query := `
+                SELECT i.id, i.name, i.type, i.rarity, i.strength_bonus, i.agility_bonus, 
+                       i.vitality_bonus, i.intelligence_bonus, i.created_at
+                FROM items i
+                JOIN character_inventory ci ON i.id = ci.item_id
+                WHERE ci.character_id = ?
+                ORDER BY i.rarity DESC, i.name ASC`
+        
+        rows, err := database.DB.Query(query, characterID)
+        if err != nil {
+                return nil, fmt.Errorf("failed to get character inventory: %v", err)
+        }
+        defer rows.Close()
+        
+        var items []models.Item
+        for rows.Next() {
+                var item models.Item
+                err := rows.Scan(
+                        &item.ID, &item.Name, &item.Type, &item.Rarity,
+                        &item.StrengthBonus, &item.AgilityBonus, &item.VitalityBonus, &item.IntelligenceBonus,
+                        &item.CreatedAt,
+                )
+                if err != nil {
+                        return nil, fmt.Errorf("failed to scan inventory item: %v", err)
+                }
+                items = append(items, item)
+        }
+        
+        return items, nil
+}
+
 // GetAllCharacters retrieves all characters with basic info
 func (cs *CharacterService) GetAllCharacters() ([]models.Character, error) {
         if database.DB == nil {
-                return nil, fmt.Errorf("database connection not available")
+                return storage.Memory.GetAllCharacters()
         }
         query := `
                 SELECT id, username, level, experience, 
