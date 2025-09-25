@@ -374,24 +374,17 @@ func (ms *MemoryStorage) PurchaseItem(characterID, itemID int, price int) error 
         ms.mutex.Lock()
         defer ms.mutex.Unlock()
         
-        // Debug logging
-        fmt.Printf("DEBUG: PurchaseItem called with characterID=%d, itemID=%d, price=%d\n", characterID, itemID, price)
-        
         // Get character
         char, exists := ms.characters[characterID]
         if !exists {
-                fmt.Printf("DEBUG: Character %d not found\n", characterID)
                 return fmt.Errorf("character not found")
         }
-        fmt.Printf("DEBUG: Found character %d: %s\n", characterID, char.Username)
         
         // Get item
         item, exists := ms.items[itemID]
         if !exists {
-                fmt.Printf("DEBUG: Item %d not found\n", itemID)
                 return fmt.Errorf("item not found")
         }
-        fmt.Printf("DEBUG: Found item %d: %s\n", itemID, item.Name)
         
         // Update character points
         char.ChannelPointsSpent += price
@@ -402,10 +395,8 @@ func (ms *MemoryStorage) PurchaseItem(characterID, itemID int, price int) error 
         // Add item to character's inventory
         if ms.inventories[characterID] == nil {
                 ms.inventories[characterID] = []models.Item{}
-                fmt.Printf("DEBUG: Created new inventory for character %d\n", characterID)
         }
         ms.inventories[characterID] = append(ms.inventories[characterID], *item)
-        fmt.Printf("DEBUG: Added item to inventory. Inventory size: %d\n", len(ms.inventories[characterID]))
         
         return nil
 }
@@ -414,21 +405,10 @@ func (ms *MemoryStorage) GetCharacterInventory(characterID int) ([]models.Item, 
         ms.mutex.RLock()
         defer ms.mutex.RUnlock()
         
-        fmt.Printf("DEBUG: GetCharacterInventory called for characterID=%d\n", characterID)
-        fmt.Printf("DEBUG: Available inventories: %v\n", func() []int {
-                keys := make([]int, 0, len(ms.inventories))
-                for k := range ms.inventories {
-                        keys = append(keys, k)
-                }
-                return keys
-        }())
-        
         if inventory, exists := ms.inventories[characterID]; exists {
-                fmt.Printf("DEBUG: Found inventory for character %d with %d items\n", characterID, len(inventory))
                 return inventory, nil
         }
         
-        fmt.Printf("DEBUG: No inventory found for character %d\n", characterID)
         return []models.Item{}, nil
 }
 
