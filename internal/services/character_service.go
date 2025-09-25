@@ -326,8 +326,7 @@ func (cs *CharacterService) loadCharacterEquipment(character *models.Character) 
 // GetCharacterInventory retrieves a character's inventory (list of owned items)
 func (cs *CharacterService) GetCharacterInventory(characterID int) ([]models.Item, error) {
         if database.DB == nil {
-                // Return empty inventory for memory storage (simplified)
-                return []models.Item{}, nil
+                return storage.Memory.GetCharacterInventory(characterID)
         }
         
         query := `
