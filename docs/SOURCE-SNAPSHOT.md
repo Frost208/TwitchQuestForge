@@ -97,7 +97,8 @@ func main() {
         if err := router.Run(":" + port); err != nil {
                 log.Fatal("Failed to start server:", err)
         }
-}```
+}
+```
 
 ---
 
@@ -168,7 +169,8 @@ func Close() error {
                 return DB.Close()
         }
         return nil
-}```
+}
+```
 
 ---
 
@@ -241,7 +243,8 @@ func RegisterRoutes(router *gin.Engine) {
 			merchant.POST("/purchase", merchantHandler.PurchaseItem)
 		}
 	}
-}```
+}
+```
 
 ---
 
@@ -442,7 +445,8 @@ func (ch *CharacterHandler) GetAllCharacters(c *gin.Context) {
         }
 
         c.JSON(http.StatusOK, characters)
-}```
+}
+```
 
 ---
 
@@ -564,7 +568,8 @@ func (ih *ItemHandler) GetRandomItems(c *gin.Context) {
         }
 
         c.JSON(http.StatusOK, gin.H{"items": items, "count": len(items)})
-}```
+}
+```
 
 ---
 
@@ -632,7 +637,8 @@ func (ch *CombatHandler) GetCombatHistory(c *gin.Context) {
         }
 
         c.JSON(http.StatusOK, gin.H{"combat_history": combatHistory, "count": len(combatHistory)})
-}```
+}
+```
 
 ---
 
@@ -719,7 +725,8 @@ func (mh *MerchantHandler) PurchaseItem(c *gin.Context) {
         }
 
         c.JSON(http.StatusOK, gin.H{"message": "Item purchased successfully"})
-}```
+}
+```
 
 ---
 
@@ -784,7 +791,8 @@ func (eh *EventHandler) MarkEventTriggered(c *gin.Context) {
         }
 
         c.JSON(http.StatusOK, gin.H{"message": "Event marked as triggered"})
-}```
+}
+```
 
 ---
 
@@ -1005,7 +1013,8 @@ func (c *Character) AddExperience(exp int) bool {
         }
         
         return leveledUp
-}```
+}
+```
 
 ---
 
@@ -1196,7 +1205,8 @@ func ValidateItemRarity(rarity string) bool {
         default:
                 return false
         }
-}```
+}
+```
 
 ---
 
@@ -1285,7 +1295,8 @@ func SimulateCombat(attacker, defender *Character) *CombatResult {
                 CombatLog:        combatLog,
                 ExperienceGained: experienceGained,
         }
-}```
+}
+```
 
 ---
 
@@ -1481,7 +1492,8 @@ func CreateItemAcquiredEvent(character *Character, item *Item, method string) (*
         }
         
         return CreateGameEvent(EventTypeItemAcquired, &character.ID, data)
-}```
+}
+```
 
 ---
 
@@ -1887,7 +1899,8 @@ func (cs *CharacterService) GetAllCharacters() ([]models.Character, error) {
         }
         
         return characters, nil
-}```
+}
+```
 
 ---
 
@@ -2102,7 +2115,8 @@ func (is *ItemService) GetCharacterItems(characterID int) ([]models.CharacterIte
         }
         
         return characterItems, nil
-}```
+}
+```
 
 ---
 
@@ -2309,7 +2323,8 @@ func (ms *MerchantService) GetMerchantEventByID(id int) (*models.MerchantEvent, 
         }
 
         return event, nil
-}```
+}
+```
 
 ---
 
@@ -2473,7 +2488,8 @@ func (cs *CombatService) logCombat(result *models.CombatResult) error {
         )
 
         return err
-}```
+}
+```
 
 ---
 
@@ -2571,7 +2587,8 @@ func (cs *CombatService) startCombatMemory(attackerID, defenderID int) (*models.
 	}
 
 	return combatResult, nil
-}```
+}
+```
 
 ---
 
@@ -2709,7 +2726,8 @@ func (es *EventService) GetEventByID(id int) (*models.Event, error) {
         }
 
         return event, nil
-}```
+}
+```
 
 ---
 
@@ -3135,7 +3153,8 @@ func (ms *MemoryStorage) GetCharacterInventory(characterID int) ([]models.Item, 
 // Helper function to create string pointer
 func stringPtr(s string) *string {
         return &s
-}```
+}
+```
 
 ---
 
@@ -3284,7 +3303,8 @@ CREATE TABLE IF NOT EXISTS game_events (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     
     FOREIGN KEY (character_id) REFERENCES characters(id)
-);```
+);
+```
 
 ---
 
